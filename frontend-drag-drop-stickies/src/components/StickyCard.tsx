@@ -124,8 +124,8 @@ const StickyCard = (props: PropTypes) => {
       className="card"
       style={{
         backgroundColor: colors.colorBody,
-        left: `${position.x}px`,
-        top: `${position.y}px`,
+        left: `${position?.x}px`,
+        top: `${position?.y}px`,
       }}
     >
       <div
