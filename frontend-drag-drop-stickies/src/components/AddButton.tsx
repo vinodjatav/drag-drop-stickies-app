@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Plus } from "../icons/StickyIcons";
 import { Sticky } from "../model/Model";
 import colors from "../assets/colors.json";
@@ -7,6 +7,7 @@ import { BASE_URL } from "../utils";
 import { StickyContext } from "../context/StickyContext";
 
 const AddButton = () => {
+  const addButtonRef = useRef<HTMLDivElement>(null);
   const { setStickies } = useContext(StickyContext);
 
   const startingPos = useRef(10);
@@ -38,8 +39,23 @@ const AddButton = () => {
     startingPos.current += 10;
     createSticky(payload);
   };
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.ctrlKey && (event.key === "n" || event.key === "N")) {
+        addButtonRef.current?.click();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+
   return (
-    <div id="add-btn" onClick={addSticky}>
+    <div ref={addButtonRef} id="add-btn" onClick={addSticky}>
       <Plus />
     </div>
   );

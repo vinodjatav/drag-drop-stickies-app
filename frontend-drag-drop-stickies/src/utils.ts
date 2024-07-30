@@ -1,34 +1,52 @@
-export const setNewOffset = (card: any, mouseMoveDir = { x: 0, y: 0 }) => {
-  const offsetLeft = card.offsetLeft - mouseMoveDir.x;
-  const offsetTop = card.offsetTop - mouseMoveDir.y;
+import { MouseMoveDirection } from "./model/Model";
 
-  return {
-    x: offsetLeft < 0 ? 0 : offsetLeft,
-    y: offsetTop < 0 ? 0 : offsetTop,
-  };
+export const setNewOffset = (
+  card: HTMLDivElement | null,
+  mouseMoveDir: MouseMoveDirection = { x: 0, y: 0 }
+): MouseMoveDirection => {
+  if (!card) {
+    return { x: 0, y: 0 };
+  }
+
+  const offsetLeft = Math.max(0, card.offsetLeft - mouseMoveDir.x);
+  const offsetTop = Math.max(0, card.offsetTop - mouseMoveDir.y);
+
+  return { x: offsetLeft, y: offsetTop };
 };
 
-export const autoGrow = (textAreaRef: any) => {
+export const autoGrow = (textAreaRef: React.RefObject<HTMLTextAreaElement>) => {
   const { current } = textAreaRef;
-  current.style.height = "auto";
-  current.style.height = current.scrollHeight + "px";
+  if (current) {
+    current.style.height = "auto";
+    current.style.height = current.scrollHeight + "px";
+  }
 };
 
-export const setZIndex = (selectedCard: any) => {
-  selectedCard.style.zIndex = 999;
+export const setZIndex = (selectedCard: HTMLDivElement | null) => {
+  const cards = Array.from(
+    document.getElementsByClassName("card")
+  ) as HTMLDivElement[];
 
-  Array.from(document.getElementsByClassName("card")).forEach((card: any) => {
-    if (card !== selectedCard) {
-      card.style.zIndex = selectedCard.style.zIndex - 1;
-    }
-  });
+  if (selectedCard) {
+    const newZIndex = parseInt(selectedCard.style.zIndex || "0") + 1;
+    selectedCard.style.zIndex = newZIndex.toString();
+
+    cards.forEach((card) => {
+      if (card !== selectedCard) {
+        card.style.zIndex = (newZIndex - 1).toString();
+      }
+    });
+  } else {
+    cards.forEach((card) => (card.style.zIndex = "0"));
+  }
 };
 
 export const BASE_URL = "http://localhost:8080/api";
 
-export const bodyParser = (value: string) => {
+export const bodyParser = (value: string): string => {
   try {
-    return JSON.parse(value);
+    const parsedValue = JSON.parse(value);
+    return parsedValue;
   } catch (error) {
     return value;
   }

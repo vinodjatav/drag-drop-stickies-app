@@ -27,9 +27,9 @@ const StickyCard = (props: PropTypes) => {
   const body = bodyParser(sticky.body);
 
   let mouseStartPos = { x: 0, y: 0 };
-  const cardRef: any = useRef(null);
-  const textAreaRef: any = useRef(null);
-  const keyUpTimer: any = useRef(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const keyUpTimer = useRef<NodeJS.Timeout | null>(null);
 
   const updatedStickyValue: Sticky = {
     id: sticky.id,
@@ -58,16 +58,18 @@ const StickyCard = (props: PropTypes) => {
     axios
       .delete(`${BASE_URL}/stickies/${stickyId}`)
       .then(() => {
-        setStickies((prevState) => prevState.filter((sticky) => sticky.id !== stickyId));
+        setStickies((prevState) =>
+          prevState.filter((sticky) => sticky.id !== stickyId)
+        );
       })
       .catch((error) => {
         console.error("Failed to delete sticky: ", error);
       });
   };
 
-  const mouseDown = (e: any) => {
-    mouseStartPos.x = e.clientX;
-    mouseStartPos.y = e.clientY;
+  const mouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    mouseStartPos.x = event.clientX;
+    mouseStartPos.y = event.clientY;
 
     document.addEventListener("mousemove", mouseMove);
     document.addEventListener("mouseup", mouseUp);
@@ -76,7 +78,7 @@ const StickyCard = (props: PropTypes) => {
     setSelectedSticky(sticky);
   };
 
-  const mouseMove = (e: any) => {
+  const mouseMove = (e: MouseEvent) => {
     e.preventDefault();
     const mouseMoveDir = {
       x: mouseStartPos.x - e.clientX,
@@ -90,7 +92,7 @@ const StickyCard = (props: PropTypes) => {
     setPosition(newPosition);
   };
 
-  const mouseUp = (e: any) => {
+  const mouseUp = (e: React.MouseEvent<HTMLDivElement> | Event) => {
     e.preventDefault();
     document.removeEventListener("mousemove", mouseMove);
     document.removeEventListener("mouseup", mouseUp);
@@ -103,8 +105,10 @@ const StickyCard = (props: PropTypes) => {
       clearTimeout(keyUpTimer.current);
     }
     keyUpTimer.current = setTimeout(() => {
-      setBodyText(JSON.stringify(textAreaRef.current.value));
-      updatedStickyValue.body = JSON.stringify(textAreaRef.current.value);
+      if (textAreaRef.current) {
+        setBodyText(JSON.stringify(textAreaRef.current.value));
+        updatedStickyValue.body = JSON.stringify(textAreaRef.current.value);
+      }
       updateSticky(updatedStickyValue);
     }, 2000);
   };
