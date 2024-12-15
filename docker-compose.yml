@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  frontend-drag-drop-stickies:
+    build:
+      context: ./frontend-drag-drop-stickies  # Path to your React app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"          # Map React app to localhost:3000
+    depends_on:
+      - backend-drag-drop-stickies
+    networks:
+      - app-network
+
+  backend-drag-drop-stickies:
+    build:
+      context: ./backend-drag-drop-stickies   # Path to your Spring Boot app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"        # Map Spring Boot app to localhost:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stickies
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@12345
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3307:3307"
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin@12345
+      MYSQL_DATABASE: stickies
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
